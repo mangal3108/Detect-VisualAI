@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Detection</title>
+    {% load static %}
+    <link rel="stylesheet" type="text/css" href="{% static 'styles.css' %}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>PDF Detection</h1>
+        <form action="{% url 'upload_pdf' %}" method="post" enctype="multipart/form-data" class="futuristic-form">
+            {% csrf_token %}
+            <div class="file-input-wrapper">
+                <input type="file" name="pdf" id="pdf" accept="application/pdf" required class="futuristic-file-input">
+                <label for="pdf" class="futuristic-file-label">Choose a PDF</label>
+            </div>
+            <button type="submit" class="futuristic-button">
+                <span class="button-text">Upload PDF</span>
+                <span class="processing-emoji" style="display: none;">⏳</span>
+            </button>
+        </form>
+
+        <div id="results-section" style="margin-top: 2rem; display: none;">
+            <h2>Detection Results</h2>
+            <div id="pages-container"></div>
+            <div id="detection-stats" class="stats-container">
+                <p>Total Pages: <span id="page-count">0</span></p>
+                <p>AI Detection: <span id="ai-detection">Not Detected</span></p>
+            </div>
+            <div id="accuracy-section" class="accuracy-container" style="margin-top: 1rem; display: none;">
+                <p>Human Content Accuracy: <span id="human-accuracy">0%</span></p>
+                <p>AI Content Accuracy: <span id="ai-accuracy">0%</span></p>
+            </div>
+        </div>
+
+        <div id="error-section" class="error-message" style="display: none;">
+            <p>An error occurred during processing. Please try again.</p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                $('#results-section').hide();
+                $('#error-section').hide();
+                
+                var formData = new FormData();
+                var fileInput = $('#pdf')[0].files[0];
+                formData.append('pdf', fileInput);
+                
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+                    },
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $('button[type="submit"]').prop('disabled', true);
+                        $('.button-text').text('Processing');
+                        $('.processing-emoji').show();
+                    },
+                    success: function(response) {
+                        if (response.results) {
+                            $('#pages-container').empty();
+                            response.results.forEach((page, index) => {
+                                const pageHtml = `
+                                    <div class="page-result">
+                                        <h3>Page ${index + 1}</h3>
+                                        <img src="/${page.output_image}" alt="Page ${index + 1}" style="max-width: 100%;">
+                                        <p>Objects Detected: ${page.detections.length}</p>
+                                    </div>
+                                `;
+                                $('#pages-container').append(pageHtml);
+                            });
+                            
+                            if (response.ai_detected) {
+                                $('#ai-detection').text('AI Generated Content Detected').css('color', 'red');
+                            } else {
+                                $('#ai-detection').text('Human Content').css('color', 'green');
+                            }
+                            
+                            $('#page-count').text(response.results.length);
+                            $('#human-accuracy').text(response.human_accuracy.toFixed(2) + '%');
+                            $('#ai-accuracy').text(response.ai_accuracy.toFixed(2) + '%');
+                            $('#accuracy-section').show();
+
+                            $('#results-section').show();
+                        }
+                    },
+                    error: function() {
+                        $('#error-section').show();
+                    },
+                    complete: function() {
+                        $('button[type="submit"]').prop('disabled', false);
+                        $('.button-text').text('Upload PDF');
+                        $('.processing-emoji').hide();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

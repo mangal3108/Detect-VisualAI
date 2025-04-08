@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>AI Detection Tool</title>
+    {% load static %}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0; /* Light background for contrast */
+        }
+
+        /* Background Blur */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* White background with opacity */
+            backdrop-filter: blur(15px); /* Blur effect */
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9); /* Slightly opaque white */
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333; /* Dark text for contrast */
+        }
+
+        nav ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        nav ul li {
+            margin: 15px 0;
+        }
+
+        .futuristic-button {
+            background: linear-gradient(90deg, #007aff, #5ac8fa); /* iOS-like blue gradient */
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .futuristic-button:focus {
+            outline: none;
+        }
+
+        .futuristic-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            z-index: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        .futuristic-button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .futuristic-button span {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <h1>Welcome to the AI Detection Tool</h1>
+        <nav>
+            <ul>
+                <li><button class="futuristic-button" onclick="location.href='{% url 'image_detection' %}'"><span>Image Detection</span></button></li>
+                <li><button class="futuristic-button" onclick="location.href='{% url 'pdf_detection' %}'"><span>PDF Detection</span></button></li>
+                <li><button class="futuristic-button" onclick="location.href='{% url 'text_detection' %}'"><span>Text Detection</span></button></li>
+                <li><button class="futuristic-button" onclick="location.href='{% url 'scan_ai' %}'"><span>Scan AI</span></button></li>
+            </ul>
+        </nav>
+    </div>
+</body>
+</html>

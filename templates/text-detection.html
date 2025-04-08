@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Detection</title>
+    {% load static %}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0; /* Light background for contrast */
+        }
+
+        /* Background Blur */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* White background with opacity */
+            backdrop-filter: blur(15px); /* Blur effect */
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9); /* Slightly opaque white */
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333; /* Dark text for contrast */
+        }
+
+        label {
+            display: block;
+            margin: 10px 0;
+            color: #333; /* Dark text for contrast */
+        }
+
+        input[type="file"], textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background: linear-gradient(90deg, #007aff, #5ac8fa); /* iOS-like blue gradient */
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        button:focus {
+            outline: none;
+        }
+
+        .results-section {
+            margin-top: 20px;
+            text-align: left;
+            color: #333; /* Dark text for contrast */
+        }
+
+        .results-content {
+            background: #f9f9f9;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 10px;
+            white-space: pre-wrap; /* Preserve whitespace */
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <h1>Text Detection</h1>
+        <form action="{% url 'upload_file' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="file">Upload a file:</label>
+            <input type="file" name="file" id="file" required>
+            <button type="submit">Detect</button>
+        </form>
+        <form action="{% url 'process_manual_text' %}" method="post">
+            {% csrf_token %}
+            <label for="input_text">Enter text manually:</label>
+            <textarea name="input_text" id="input_text" rows="4" required></textarea>
+            <button type="submit">Process</button>
+        </form>
+        <div id="results"></div>
+
+        <!-- LLM Text Detection Section -->
+        <h2>LLM Text Detection</h2>
+        <form action="{% url 'llm_text_detection' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <label for="llm_file">Upload text file for LLM analysis:</label>
+            <input type="file" name="llm_file" id="llm_file" accept=".txt,.doc,.docx">
+
+            <br>
+            <label for="llm_text">Or enter text for LLM analysis:</label>
+            <textarea name="llm_text" id="llm_text" rows="4"></textarea>
+            <button type="submit">Analyze with LLM</button>
+        </form>
+
+        <div id="llm-results" class="results-section">
+            <h3>LLM Analysis Results</h3>
+            <div class="results-content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Add any necessary JavaScript for handling results display
+        function displayLLMResults(data) {
+            const resultsDiv = document.querySelector('#llm-results .results-content');
+            resultsDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,129 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Container Styles */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Form Styles */
+.futuristic-form {
+    background: #2c3e50;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+/* File Input Styles */
+.file-input-wrapper {
+    position: relative;
+    overflow: hidden;
+    margin: 20px 0;
+}
+
+.futuristic-file-input {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin: 0;
+    padding: 0;
+    font-size: 20px;
+    cursor: pointer;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+.futuristic-file-label {
+    display: block;
+    padding: 15px 30px;
+    background: #3498db;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.futuristic-file-label:hover {
+    background: #2980b9;
+}
+
+/* Button Styles */
+.futuristic-button {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    background: #27ae60;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background 0.3s ease;
+}
+
+.futuristic-button:hover {
+    background: #2ecc71;
+}
+
+.futuristic-button:disabled {
+    background: #7f8c8d;
+    cursor: not-allowed;
+}
+
+/* Results Section */
+#results-section {
+    margin-top: 30px;
+    padding: 20px;
+    background: #34495e;
+    border-radius: 8px;
+    color: white;
+}
+
+.stats-container {
+    margin-top: 20px;
+    padding: 15px;
+    background: #2c3e50;
+    border-radius: 5px;
+}
+
+/* Error Message */
+.error-message {
+    margin-top: 20px;
+    padding: 15px;
+    background: #e74c3c;
+    color: white;
+    border-radius: 5px;
+    text-align: center;
+}
+
+/* Page Results */
+.page-result {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: #2c3e50;
+    border-radius: 5px;
+}
+
+.page-result img {
+    margin-top: 10px;
+    border-radius: 5px;
+}
+
+/* Processing Emoji */
+.processing-emoji {
+    margin-left: 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}

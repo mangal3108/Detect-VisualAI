@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Image Detection</title>
+    {% load static %}
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            color: #ffffff;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: #f0f0f0; /* Light background for contrast */
+        }
+
+        /* Background Blur */
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8); /* White background with opacity */
+            backdrop-filter: blur(15px); /* Blur effect */
+            z-index: -1;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.9); /* Slightly opaque white */
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #333; /* Dark text for contrast */
+        }
+
+        .futuristic-form {
+            width: 100%;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .futuristic-file-input {
+            display: none; /* Hide the default file input */
+        }
+
+        .futuristic-file-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #007aff; /* iOS-like blue */
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .futuristic-file-label:hover {
+            background: #005bb5; /* Darker blue on hover */
+        }
+
+        .futuristic-button {
+            background: linear-gradient(90deg, #007aff, #5ac8fa); /* iOS-like blue gradient */
+            border: none;
+            border-radius: 25px;
+            color: white;
+            padding: 15px 30px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .futuristic-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .futuristic-button:focus {
+            outline: none;
+        }
+
+        .futuristic-button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 300%;
+            height: 300%;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transition: all 0.5s ease;
+            z-index: 0;
+            transform: translate(-50%, -50%) scale(0);
+        }
+
+        .futuristic-button:hover::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .futuristic-button span {
+            position: relative;
+            z-index: 1;
+        }
+
+        #results-section, #error-section {
+            margin-top: 2rem;
+            display: none;
+        }
+
+        .image-container img {
+            max-width: 100%;
+        }
+
+        .stats-container {
+            margin-top: 1rem;
+            color: #333; /* Dark text for contrast */
+        }
+
+        .error-message {
+            color: red;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="background"></div>
+    <div class="container">
+        <h1>Image Detection</h1>
+        <form action="{% url 'upload_file' %}" method="post" enctype="multipart/form-data" class="futuristic-form">
+            {% csrf_token %}
+            <div class="file-input-wrapper">
+                <input type="file" name="file" id="file" required class="futuristic-file-input">
+                <label for="file" class="futuristic-file-label">Choose an Image</label>
+            </div>
+            <button type="submit" class="futuristic-button">
+                <span class="button-text">Upload Image</span>
+                <span class="processing-emoji" style="display: none;">⏳</span>
+            </button>
+        </form>
+
+        <div id="results-section" style="margin-top: 2rem; display: none;">
+            <h2>Detection Results</h2>
+            <div class="image-container">
+                <img id="detected-image" src="" alt="Detected Image">
+            </div>
+            <div id="detection-stats" class="stats-container">
+                <p>Objects Detected: <span id="object-count">0</span></p>
+                <p>Processing Time: <span id="processing-time">0</span> ms</p>
+                <p>AI Detection: <span id="ai-detection">Not Detected</span></p>
+            </div>
+            <div id="accuracy-section" class="accuracy-container" style="margin-top: 1rem; display: none;">
+                <p>Human Content Accuracy: <span id="human-accuracy">0%</span></p>
+                <p>AI Content Accuracy: <span id="ai-accuracy">0%</span></p>
+            </div>
+        </div>
+
+        <div id="error-section" class="error-message" style="display: none;">
+            <p>An error occurred during processing. Please try again.</p>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('form').on('submit', function(e) {
+                e.preventDefault();
+                $('#results-section').hide();
+                $('#error-section').hide();
+                
+                var formData = new FormData();
+                var fileInput = $('#file')[0].files[0];
+                formData.append('file', fileInput);
+                
+                $.ajax({
+                    url: $(this).attr('action'),
+                    type: 'POST',
+                    data: formData,
+                    headers: {
+                        'X-CSRFToken': $('input[name="csrfmiddlewaretoken"]').val()
+                    },
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function() {
+                        $('button[type="submit"]').prop('disabled', true);
+                        $('.button-text').text('Processing');
+                        $('.processing-emoji').show();
+                    },
+                    success: function(response) {
+                        if (response.output_image) {
+                            $('#detected-image').attr('src', '/' + response.output_image);
+                            console.log(response); // Debugging log to check the response
+                            $('#object-count').text(response.detections.length);
+                            $('#human-accuracy').text(response.human_accuracy.toFixed(2) + '%');
+                            $('#ai-accuracy').text(response.ai_accuracy.toFixed(2) + '%');
+                            $('#accuracy-section').show();
+
+                            $('#human-accuracy').text(response.human_accuracy.toFixed(2) + '%');
+                            $('#ai-accuracy').text(response.ai_accuracy.toFixed(2) + '%');
+                            $('#accuracy-section').show();
+
+                            $('#results-section').show();
+                        }
+                    },
+                    error: function() {
+                        $('#error-section').show();
+                    },
+                    complete: function() {
+                        $('button[type="submit"]').prop('disabled', false);
+                        $('.button-text').text('Upload Image');
+                        $('.processing-emoji').hide();
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
