@@ -127,6 +127,4 @@ Created by **Mangal Krishna Singh Bhadouriya**
 
 Your AI Detection Web App should now be running locally! 🚀
 
----
 
-Would you like this added to the full GitHub description above or saved as a `README.md` file?
